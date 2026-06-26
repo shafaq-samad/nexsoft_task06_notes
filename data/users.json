@@ -1,0 +1,16 @@
+[
+  {
+    "id": "h592jo2cewl",
+    "username": "shafaq",
+    "email": "ahad28723@gmail.com",
+    "passwordHash": "$2b$10$nHq0rW4TLgrB04Qyo9J48eKsbiTKI/CBFG5vm7xCVWxE.E2WGJARG",
+    "createdAt": "2026-06-25T19:45:02.519Z"
+  },
+  {
+    "id": "4lerkfga6k",
+    "username": "shafaqsa",
+    "email": "shafaqsamad111@gmail.com",
+    "passwordHash": "$2b$10$qF4NyoRqgfjk696cG9JbNOT/H.ENLK7ay41L.BgOSHEjtfr.0C8aC",
+    "createdAt": "2026-06-26T16:19:16.708Z"
+  }
+]

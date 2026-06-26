@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom Sentience Ledger Colors */
+  --color-surface: #f9f9ff;
+  --color-surface-dim: #d4daea;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f1f3ff;
+  --color-surface-container: #e8eeff;
+  --color-surface-container-high: #e3e8f9;
+  --color-surface-container-highest: #dde2f3;
+  --color-on-surface: #161c27;
+  --color-on-surface-variant: #434653;
+  --color-outline: #737784;
+  --color-outline-variant: #c3c6d5;
+  --color-primary: #003c90;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0f52ba;
+  --color-on-primary-container: #bcceff;
+  --color-secondary: #545f72;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d5e0f7;
+  --color-on-secondary-container: #586377;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+  }
+}
+

@@ -1,0 +1,89 @@
+[
+  {
+    "id": "rax2ifhk1",
+    "userId": "h592jo2cewl",
+    "title": "Q3 Strategic Planning",
+    "content": "Discussion points for the upcoming quarterly board meeting. Key focuses include operational efficiency and expansion into new high-trust market verticals. Need to review the security protocols for the cloud migration...",
+    "tags": [
+      "Strategy",
+      "Business"
+    ],
+    "isFavorite": true,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-25T18:45:02.522Z",
+    "updatedAt": "2026-06-25T18:45:02.523Z"
+  },
+  {
+    "id": "c8q80d8r05r",
+    "userId": "h592jo2cewl",
+    "title": "System Credentials",
+    "content": "Admin access keys and secondary validation tokens for the staging environment. Reminder to rotate these every 30 days and never share via unencrypted channels. Staging IP: 192.168.1.104...",
+    "tags": [
+      "Secure",
+      "DevOps"
+    ],
+    "isFavorite": false,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-25T17:45:02.523Z",
+    "updatedAt": "2026-06-25T17:45:02.523Z"
+  },
+  {
+    "id": "fpywou7aocn",
+    "userId": "h592jo2cewl",
+    "title": "Grocery List",
+    "content": "Milk, eggs, artisan bread, coffee beans (medium roast), organic kale, almonds, and that specific greek yogurt Brand A. Also check for seasonal fruits for the office snacks.",
+    "tags": [
+      "Personal"
+    ],
+    "isFavorite": false,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-24T19:45:02.523Z",
+    "updatedAt": "2026-06-24T19:45:02.523Z"
+  },
+  {
+    "id": "snwjcpi3e69",
+    "userId": "h592jo2cewl",
+    "title": "Project 'Titan' Roadmap",
+    "content": "Phase 1: Architecture review. Phase 2: Core engine development. Phase 3: Stress testing and penetration reports. Launch scheduled for Q4.",
+    "tags": [
+      "Work",
+      "Titan"
+    ],
+    "isFavorite": true,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-23T19:45:02.523Z",
+    "updatedAt": "2026-06-23T19:45:02.523Z"
+  },
+  {
+    "id": "ex98a7w0psl",
+    "userId": "h592jo2cewl",
+    "title": "Research: Quantum Crypto",
+    "content": "Notes on Lattice-based cryptography and its potential resistance to Shor's algorithm. Investigating implementation complexity for small-scale mobile applications.",
+    "tags": [
+      "R&D"
+    ],
+    "isFavorite": false,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-22T19:45:02.523Z",
+    "updatedAt": "2026-06-22T19:45:02.523Z"
+  },
+  {
+    "id": "3qiw8cajay5",
+    "userId": "4lerkfga6k",
+    "title": "Welcome Note",
+    "content": "Your first note in the secure workspace.",
+    "tags": [
+      "Getting Started"
+    ],
+    "isFavorite": false,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-06-26T16:19:16.711Z",
+    "updatedAt": "2026-06-26T16:19:16.711Z"
+  }
+]
