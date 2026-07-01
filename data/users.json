@@ -12,5 +12,12 @@
     "email": "shafaqsamad111@gmail.com",
     "passwordHash": "$2b$10$qF4NyoRqgfjk696cG9JbNOT/H.ENLK7ay41L.BgOSHEjtfr.0C8aC",
     "createdAt": "2026-06-26T16:19:16.708Z"
+  },
+  {
+    "id": "tdvxx73rvyh",
+    "username": "John",
+    "email": "professional.user@enterprise.com",
+    "passwordHash": "$2b$10$d7rXG3l2lmj2LR44sak8bOcBpSytEEabn9FyjcDJlS3tYNt7n0rBa",
+    "createdAt": "2026-07-01T17:43:50.756Z"
   }
 ]

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Menu,
   Search,
@@ -9,7 +9,6 @@ import {
   Trash2,
   Plus,
   PlusCircle,
-  HelpCircle,
   Shield,
   FileSpreadsheet
 } from "lucide-react";
@@ -30,6 +29,7 @@ interface DashboardProps {
   onToggleArchive: (id: string, e: React.MouseEvent) => void;
   onDeleteNote: (id: string, e: React.MouseEvent) => void;
   onLogout: () => void;
+  isLoading?: boolean;
 }
 
 export default function Dashboard({
@@ -46,6 +46,7 @@ export default function Dashboard({
   onToggleArchive,
   onDeleteNote,
   onLogout,
+  isLoading = false,
 }: DashboardProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -70,9 +71,10 @@ export default function Dashboard({
     onNewNote();
   };
 
-  const handleViewTasks = () => {
-    alert("Listing all categorized tactical checklist items...");
-    onSearchQueryChange("task");
+  const [toastMessage, setToastMessage] = useState("");
+
+  const handleShowAnnouncement = () => {
+    setToastMessage("Your latest draft is ready in the workspace.");
   };
 
   return (
@@ -83,6 +85,7 @@ export default function Dashboard({
           {/* Logo & Hamburguer */}
           <div className="flex items-center gap-4">
             <button
+              aria-label="Open navigation"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-1 rounded-md text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
             >
@@ -93,7 +96,7 @@ export default function Dashboard({
             </h1>
             <h1 className="md:hidden font-headline-md text-lg font-bold text-primary flex items-center gap-1.5">
               <Shield className="w-5 h-5" fill="currentColor" />
-              <span>SecureNotes</span>
+              <span>Northstar Notes</span>
             </h1>
           </div>
 
@@ -114,7 +117,8 @@ export default function Dashboard({
           {/* Notification Button / Initials bubble */}
           <div className="flex items-center gap-4">
             <button
-              onClick={() => alert("Notification vault empty. All security protocols operational.")}
+              aria-label="Show workspace summary"
+              onClick={handleShowAnnouncement}
               className="p-1.5 text-on-surface-variant hover:bg-surface-container transition-colors rounded-full cursor-pointer relative"
             >
               <Bell className="w-5 h-5" />
@@ -141,9 +145,10 @@ export default function Dashboard({
             <div className="flex items-center gap-2 mb-8 px-2 justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="w-6 h-6 text-primary" fill="currentColor" />
-                <span className="font-headline-md text-lg font-bold text-primary">SecureNotes</span>
+                <span className="font-headline-md text-lg font-bold text-primary">Northstar Notes</span>
               </div>
               <button
+                aria-label="Close navigation"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-on-surface-variant hover:text-primary transition-colors text-xl font-bold cursor-pointer"
               >
@@ -207,6 +212,7 @@ export default function Dashboard({
               </div>
 
               <button
+                aria-label="Sign out"
                 onClick={onLogout}
                 className="w-full text-center py-2 border border-outline-variant hover:bg-error-container/10 hover:text-error rounded-lg text-xs transition-colors cursor-pointer"
               >
@@ -254,10 +260,10 @@ export default function Dashboard({
                   Quick Draft
                 </button>
                 <button
-                  onClick={handleViewTasks}
+                  onClick={handleShowAnnouncement}
                   className="font-label-md text-sm border border-primary text-primary px-5 py-2 rounded-full hover:bg-primary-container/5 transition-colors cursor-pointer"
                 >
-                  View Tasks
+                  View Summary
                 </button>
               </div>
             </div>
@@ -283,6 +289,12 @@ export default function Dashboard({
             </div>
           </div>
 
+          {toastMessage && (
+            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+              {toastMessage}
+            </div>
+          )}
+
           {/* Notes Title Header for List section */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-headline-md text-sm font-semibold uppercase tracking-wider text-on-surface-variant">
@@ -291,6 +303,7 @@ export default function Dashboard({
 
             {searchQuery && (
               <button
+                aria-label="Clear search"
                 onClick={() => onSearchQueryChange("")}
                 className="text-xs text-primary hover:underline font-semibold"
               >
@@ -302,8 +315,12 @@ export default function Dashboard({
           {/* Notes Grid List */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="notes-container">
             {/* Create New Note Draft Box (only if not viewing trash) */}
+            {isLoading && !notes.length ? (
+              <div className="col-span-full">Loading notes…</div>
+            ) : null}
             {activeView !== "trashed" && (
-              <div
+              <button
+                type="button"
                 onClick={onNewNote}
                 className="note-card bg-surface-container border border-dashed border-outline rounded-xl p-6 flex flex-col items-center justify-center h-full min-h-[180px] cursor-pointer hover:bg-surface-container-high transition-all hover:border-primary text-center group"
               >
@@ -311,7 +328,7 @@ export default function Dashboard({
                 <span className="font-label-md text-sm text-on-surface-variant font-semibold group-hover:text-primary transition-colors">
                   Create new note...
                 </span>
-              </div>
+              </button>
             )}
 
             {/* Note Cards List */}
@@ -343,6 +360,7 @@ export default function Dashboard({
 
       {/* Floating Action Button (Mobile FAB) */}
       <button
+        aria-label="Create new note"
         onClick={onNewNote}
         className="md:hidden fixed bottom-20 right-6 z-50 w-14 h-14 bg-primary hover:bg-primary-container text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
         title="Create New Note"

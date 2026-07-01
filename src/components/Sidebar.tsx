@@ -36,7 +36,7 @@ export default function Sidebar({
       {/* Brand Logo */}
       <div className="flex items-center gap-2 mb-8 px-2">
         <Shield className="w-7 h-7 text-primary animate-pulse" fill="currentColor" />
-        <span className="font-headline-md text-xl font-bold text-primary">SecureNotes</span>
+        <span className="font-headline-md text-xl font-bold text-primary">Northstar Notes</span>
       </div>
 
       {/* New Note Button */}

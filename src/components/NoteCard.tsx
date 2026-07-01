@@ -46,6 +46,7 @@ export default function NoteCard({
           {note.title || "Untitled Note"}
         </h3>
         <button
+          aria-label={note.isFavorite ? "Remove from favorites" : "Add to favorites"}
           onClick={(e) => onToggleFavorite(note.id, e)}
           className="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer shrink-0"
           title={note.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
@@ -89,6 +90,7 @@ export default function NoteCard({
             {/* Archive / Unarchive Action */}
             {!note.isTrashed && (
               <button
+                aria-label={note.isArchived ? "Unarchive note" : "Archive note"}
                 onClick={(e) => onToggleArchive(note.id, e)}
                 className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                 title={note.isArchived ? "Unarchive Note" : "Archive Note"}
@@ -99,6 +101,7 @@ export default function NoteCard({
 
             {/* Edit action */}
             <button
+              aria-label="Edit note"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(note);
@@ -111,6 +114,7 @@ export default function NoteCard({
 
             {/* Trash / Delete permanently action */}
             <button
+              aria-label={note.isTrashed ? "Delete note permanently" : "Move note to trash"}
               onClick={(e) => onDelete(note.id, e)}
               className="p-1 rounded hover:bg-error-container/25 text-on-surface-variant hover:text-error transition-colors cursor-pointer"
               title={note.isTrashed ? "Delete permanently" : "Move to Trash"}
@@ -121,6 +125,7 @@ export default function NoteCard({
             {/* Restore action for trashed items */}
             {note.isTrashed && (
               <button
+                aria-label="Restore note"
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleArchive(note.id, e); // Toggle isTrashed in db to false

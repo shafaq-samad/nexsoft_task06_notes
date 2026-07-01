@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Shield, User as UserIcon, Mail, Lock, ArrowRight, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Input";
+import type { ApiError } from "../types";
 
 interface RegisterProps {
   onRegister: (username: string, email: string, password: string) => Promise<void>;
@@ -36,8 +39,9 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
 
     try {
       await onRegister(username, email, password);
-    } catch (err: any) {
-      setLocalError(err.message || "Registration failed. Please try again.");
+    } catch (err) {
+      const error = err as ApiError;
+      setLocalError(error.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -51,8 +55,8 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
           <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-container rounded-lg mb-4 text-on-primary">
             <Shield className="w-6 h-6" fill="currentColor" />
           </div>
-          <h1 className="font-headline-lg text-2xl font-bold text-primary mb-1">Create Account</h1>
-          <p className="font-body-sm text-sm text-on-surface-variant">Secure your thoughts with enterprise-grade encryption.</p>
+          <h1 className="font-headline-lg text-2xl font-bold text-primary mb-1">Create account</h1>
+          <p className="font-body-sm text-sm text-on-surface-variant">Secure your notes in a workspace that feels professional from day one.</p>
         </div>
 
         {/* Form Content */}
@@ -74,7 +78,7 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
               <span className="absolute left-3 text-outline">
                 <UserIcon className="w-5 h-5" />
               </span>
-              <input
+              <Input
                 className="w-full pl-11 pr-4 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-sm text-on-surface placeholder:text-outline-variant"
                 id="username"
                 type="text"
@@ -95,7 +99,7 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
               <span className="absolute left-3 text-outline">
                 <Mail className="w-5 h-5" />
               </span>
-              <input
+              <Input
                 className="w-full pl-11 pr-4 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-sm text-on-surface placeholder:text-outline-variant"
                 id="email"
                 type="email"
@@ -117,7 +121,7 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
                 <span className="absolute left-3 text-outline">
                   <Lock className="w-5 h-5" />
                 </span>
-                <input
+                <Input
                   className="w-full pl-11 pr-4 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-sm text-on-surface placeholder:text-outline-variant"
                   id="password"
                   type="password"
@@ -137,7 +141,7 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
                 <span className="absolute left-3 text-outline">
                   <Lock className="w-5 h-5" />
                 </span>
-                <input
+                <Input
                   className="w-full pl-11 pr-4 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-sm text-on-surface placeholder:text-outline-variant"
                   id="confirm-password"
                   type="password"
@@ -162,34 +166,18 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
             />
             <label className="font-body-sm text-xs text-on-surface-variant leading-tight select-none cursor-pointer" htmlFor="terms">
               I agree to the{" "}
-              <button
-                type="button"
-                onClick={() => alert("Terms of Service: By signing up, you agree to maintain credential confidentiality and respect note privacy rules.")}
-                className="text-primary hover:underline font-medium cursor-pointer"
-              >
-                Terms of Service
-              </button>{" "}
+              <span className="text-primary font-medium">Terms of Service</span>{" "}
               and{" "}
-              <button
-                type="button"
-                onClick={() => alert("Privacy Policy: Your notes are encrypted and fully private to your account. We never share or expose your personal content.")}
-                className="text-primary hover:underline font-medium cursor-pointer"
-              >
-                Privacy Policy
-              </button>
+              <span className="text-primary font-medium">Privacy Policy</span>
               .
             </label>
           </div>
 
           {/* Action Button */}
-          <button
-            className="w-full bg-primary text-white font-label-md font-medium py-3 rounded-lg hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
-            type="submit"
-            disabled={loading}
-          >
+          <Button className="w-full flex items-center justify-center gap-2 shadow-sm" type="submit" disabled={loading}>
             {loading ? "Creating account..." : "Sign Up"}
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Button>
 
           {/* Login Redirect */}
           <div className="text-center pt-2">
@@ -221,7 +209,7 @@ export default function Register({ onRegister, onNavigateToLogin, errorMsg, clea
 
       {/* Footer Help */}
       <footer className="mt-8 text-center text-xs text-on-surface-variant/60">
-        <p>© 2026 SecureNotes Enterprise. All systems operational.</p>
+        <p>© 2026 Northstar Notes. All systems operational.</p>
       </footer>
     </div>
   );

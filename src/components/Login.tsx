@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { Shield, Mail, Lock, Eye, EyeOff, Key, ShieldAlert } from "lucide-react";
+import { Shield, Mail, Lock, Eye, EyeOff, ShieldAlert } from "lucide-react";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Input";
+import type { ApiError } from "../types";
 
 interface LoginProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -24,21 +27,18 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
 
     try {
       await onLogin(email, password);
-    } catch (err: any) {
-      setLocalError(err.message || "Invalid credentials");
+    } catch (err) {
+      const error = err as ApiError;
+      setLocalError(error.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSSO = () => {
-    alert("SSO Login simulation activated: Authenticating with corporate credentials...");
+  const handleDemoFill = () => {
     setEmail("professional.user@enterprise.com");
     setPassword("password123");
-  };
-
-  const handleRequestAccess = () => {
-    alert("Access Request logged. If authorized, your administrator will issue credentials shortly.");
+    setLocalError("");
   };
 
   return (
@@ -55,8 +55,8 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-container rounded-xl mb-4 shadow-lg shadow-primary-container/20 text-on-primary">
             <Shield className="w-8 h-8" fill="currentColor" />
           </div>
-          <h1 className="font-headline-lg text-2xl md:text-3xl font-bold text-primary tracking-tight">Sentience Ledger</h1>
-          <p className="font-body-sm text-sm text-on-surface-variant mt-1">Secure Notes Management System</p>
+          <h1 className="font-headline-lg text-2xl md:text-3xl font-bold text-primary tracking-tight">Northstar Notes</h1>
+          <p className="font-body-sm text-sm text-on-surface-variant mt-1">A polished notes workspace for modern teams</p>
         </div>
 
         {/* Form Card */}
@@ -79,7 +79,7 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
                 <span className="absolute left-3 text-on-surface-variant">
                   <Mail className="w-5 h-5" />
                 </span>
-                <input
+                <Input
                   className="w-full pl-11 pr-4 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-on-surface text-base placeholder:text-outline"
                   id="email"
                   type="email"
@@ -97,19 +97,15 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
                 <label className="font-label-md text-sm text-on-surface-variant block" htmlFor="password">
                   Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => alert("Please contact your IT administrator to reset your enterprise passphrase.")}
-                  className="font-label-sm text-xs text-primary hover:underline transition-colors cursor-pointer"
-                >
-                  Forgot Password?
-                </button>
+                <span className="font-label-sm text-xs text-on-surface-variant">
+                  Use demo credentials below
+                </span>
               </div>
               <div className="relative group flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10 rounded-lg transition-all bg-white">
                 <span className="absolute left-3 text-on-surface-variant">
                   <Lock className="w-5 h-5" />
                 </span>
-                <input
+                <Input
                   className="w-full pl-11 pr-11 py-3 bg-transparent border-none outline-none focus:ring-0 font-body-md text-on-surface text-base placeholder:text-outline"
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -119,6 +115,7 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
                   required
                 />
                 <button
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -143,13 +140,9 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
             </div>
 
             {/* Action Button */}
-            <button
-              className="w-full bg-primary hover:bg-primary-container text-white font-headline-md font-medium py-3 rounded-lg shadow-md active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:opacity-50"
-              type="submit"
-              disabled={loading}
-            >
+            <Button className="w-full shadow-md active:scale-[0.98]" type="submit" disabled={loading}>
               {loading ? "Authenticating..." : "Login"}
-            </button>
+            </Button>
           </form>
 
           {/* Divider */}
@@ -161,12 +154,13 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
 
           {/* SSO Button */}
           <button
-            onClick={handleSSO}
+            onClick={handleDemoFill}
+            aria-label="Fill demo credentials"
             className="w-full flex items-center justify-center space-x-3 border border-outline-variant py-3 rounded-lg hover:bg-surface-container-low transition-colors group cursor-pointer"
           >
-            <Key className="w-5 h-5 text-on-surface-variant group-hover:text-primary transition-colors" />
+            <Shield className="w-5 h-5 text-on-surface-variant group-hover:text-primary transition-colors" />
             <span className="font-body-md text-sm text-on-surface-variant font-medium">
-              Sign in with Corporate SSO
+              Use demo credentials
             </span>
           </button>
         </div>
@@ -174,7 +168,7 @@ export default function Login({ onLogin, onNavigateToRegister, errorMsg, clearEr
         {/* Footer Link */}
         <div className="mt-6 text-center">
           <p className="font-body-md text-sm text-on-surface-variant">
-            New to Sentience Ledger?{" "}
+            New to Northstar Notes?{" "}
             <button
               onClick={onNavigateToRegister}
               className="text-primary font-bold hover:underline ml-1 cursor-pointer"

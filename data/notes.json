@@ -85,5 +85,43 @@
     "isTrashed": false,
     "createdAt": "2026-06-26T16:19:16.711Z",
     "updatedAt": "2026-06-26T16:19:16.711Z"
+  },
+  {
+    "id": "000z9mnib62d8",
+    "userId": "tdvxx73rvyh",
+    "title": "Welcome Note",
+    "content": "Your first note in the workspace.",
+    "tags": [
+      "Getting Started"
+    ],
+    "isFavorite": false,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-07-01T17:43:50.759Z",
+    "updatedAt": "2026-07-01T17:43:50.759Z"
+  },
+  {
+    "id": "z99yrr9enki",
+    "userId": "tdvxx73rvyh",
+    "title": "gg",
+    "content": "gg",
+    "tags": [],
+    "isFavorite": true,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-07-01T17:52:08.428Z",
+    "updatedAt": "2026-07-01T17:52:37.510Z"
+  },
+  {
+    "id": "smdikfhlb1",
+    "userId": "tdvxx73rvyh",
+    "title": "gg",
+    "content": "gg",
+    "tags": [],
+    "isFavorite": true,
+    "isArchived": false,
+    "isTrashed": false,
+    "createdAt": "2026-07-01T17:54:28.610Z",
+    "updatedAt": "2026-07-01T17:54:28.610Z"
   }
 ]

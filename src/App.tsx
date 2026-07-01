@@ -1,299 +1,50 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Dashboard from "./components/Dashboard";
-import NoteModal from "./components/NoteModal";
-import Sidebar from "./components/Sidebar";
-import { User, Note, DashboardStats, AuthResponse } from "./types";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Shield } from "lucide-react";
+import { useAuth } from "./hooks/useAuth";
+import { useNotes } from "./hooks/useNotes";
+import { Note, NotePayload } from "./types";
 
-const getApiUrl = (path: string) => {
-  const base = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+const Login = lazy(() => import("./components/Login"));
+const Register = lazy(() => import("./components/Register"));
+const Dashboard = lazy(() => import("./components/Dashboard"));
+const NoteModal = lazy(() => import("./components/NoteModal"));
+const Sidebar = lazy(() => import("./components/Sidebar"));
 
-  if (!base) return normalizedPath;
-  if (base.endsWith("/api")) {
-    return `${base}${normalizedPath.replace(/^\/api/, "")}`;
-  }
-
-  return `${base}${normalizedPath}`;
-};
+function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-surface text-on-surface flex flex-col overflow-x-hidden">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-white">
+        Skip to main content
+      </a>
+      {children}
+    </div>
+  );
+}
 
 export default function App() {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-  const [currentUser, setCurrentUser] = useState<Omit<User, "passwordHash"> | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalNotes: 0,
-    favoritesCount: 0,
-    archivedCount: 0,
-    trashedCount: 0,
-  });
-
-  const [currentScreen, setCurrentScreen] = useState<"login" | "register" | "dashboard">(
-    token ? "dashboard" : "login"
-  );
-  const [activeView, setActiveView] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const { token, currentUser, currentView, authError, appInitializing, setCurrentView, setAuthError, login, register, logout } = useAuth();
+  const initialNotesView = currentView === "dashboard" ? "all" : "all";
+  const { notes, stats, activeView, searchQuery, setActiveView, setSearchQuery, saveNote, toggleFavorite, toggleArchive, deleteNote, isLoading } = useNotes(token, initialNotesView);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [appInitializing, setAppInitializing] = useState<boolean>(true);
-  const [authError, setAuthError] = useState<string>("");
 
-  // Setup Authorization headers
-  const getAuthHeaders = useCallback(() => {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }, [token]);
-
-  // Fetch stats helper
-  const fetchStats = useCallback(async () => {
-    if (!token) return;
-    try {
-      const res = await fetch(getApiUrl("/api/notes/stats"), {
-        headers: getAuthHeaders(),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
-    } catch (e) {
-      console.error("Error fetching notes stats:", e);
-    }
-  }, [token, getAuthHeaders]);
-
-  // Fetch notes helper
-  const fetchNotes = useCallback(async () => {
-    if (!token) return;
-    try {
-      const url = getApiUrl(`/api/notes?view=${activeView}&q=${encodeURIComponent(searchQuery)}`);
-      const res = await fetch(url, {
-        headers: getAuthHeaders(),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setNotes(data);
-      }
-    } catch (e) {
-      console.error("Error fetching notes list:", e);
-    }
-  }, [token, activeView, searchQuery, getAuthHeaders]);
-
-  // Combined fetch data helper
-  const refreshWorkspace = useCallback(() => {
-    fetchNotes();
-    fetchStats();
-  }, [fetchNotes, fetchStats]);
-
-  // Initial session verification
-  useEffect(() => {
-    const verifySession = async () => {
-      const savedToken = localStorage.getItem("token");
-      if (!savedToken) {
-        setAppInitializing(false);
-        return;
-      }
-
-      try {
-        const res = await fetch(getApiUrl("/api/auth/me"), {
-          headers: {
-            Authorization: `Bearer ${savedToken}`,
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setCurrentUser(data.user);
-          setToken(savedToken);
-          setCurrentScreen("dashboard");
-        } else {
-          // Token expired or invalid
-          localStorage.removeItem("token");
-          setToken(null);
-          setCurrentScreen("login");
-        }
-      } catch (e) {
-        console.error("Session verification failed:", e);
-        // Fallback to local session state
-      } finally {
-        setAppInitializing(false);
-      }
-    };
-
-    verifySession();
-  }, []);
-
-  // Trigger data reload on view or search query changes
-  useEffect(() => {
-    if (token && currentScreen === "dashboard") {
-      refreshWorkspace();
-    }
-  }, [token, currentScreen, activeView, searchQuery, refreshWorkspace]);
-
-  // Auth Handlers
-  const handleLogin = async (email: string, password: string) => {
-    setAuthError("");
-    const res = await fetch(getApiUrl("/api/auth/login"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Authentication failed");
-    }
-
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setCurrentUser(data.user);
-    setCurrentScreen("dashboard");
+  const handleSaveNote = async (noteData: NotePayload) => {
+    await saveNote(noteData);
   };
 
-  const handleRegister = async (username: string, email: string, password: string) => {
-    setAuthError("");
-    const res = await fetch(getApiUrl("/api/auth/register"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Registration failed");
-    }
-
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setCurrentUser(data.user);
-    setCurrentScreen("dashboard");
+  const handleToggleFavorite = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    await toggleFavorite(id);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setCurrentUser(null);
-    setNotes([]);
-    setSearchQuery("");
-    setActiveView("all");
-    setCurrentScreen("login");
+  const handleToggleArchive = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    await toggleArchive(id);
   };
 
-  // Notes CRUD Handlers
-  const handleSaveNote = async (noteData: {
-    title: string;
-    content: string;
-    tags: string[];
-    isFavorite: boolean;
-  }) => {
-    try {
-      if (editingNote) {
-        // Update
-        const res = await fetch(getApiUrl(`/api/notes/${editingNote.id}`), {
-          method: "PUT",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(noteData),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to update note");
-        }
-      } else {
-        // Create
-        const res = await fetch(getApiUrl("/api/notes"), {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(noteData),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to create note");
-        }
-      }
-
-      refreshWorkspace();
-    } catch (e: any) {
-      console.error(e);
-      throw e;
-    }
-  };
-
-  const handleToggleFavorite = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const targetNote = notes.find((n) => n.id === id);
-    if (!targetNote) return;
-
-    try {
-      const res = await fetch(getApiUrl(`/api/notes/${id}`), {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ isFavorite: !targetNote.isFavorite }),
-      });
-
-      if (res.ok) {
-        refreshWorkspace();
-      }
-    } catch (err) {
-      console.error("Error toggling favorite flag:", err);
-    }
-  };
-
-  const handleToggleArchive = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const targetNote = notes.find((n) => n.id === id);
-    if (!targetNote) return;
-
-    try {
-      const payload: Record<string, boolean> = {};
-      if (targetNote.isTrashed) {
-        // If restoring a trashed note, un-trash it
-        payload.isTrashed = false;
-      } else {
-        // Invert archive state
-        payload.isArchived = !targetNote.isArchived;
-      }
-
-      const res = await fetch(getApiUrl(`/api/notes/${id}`), {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        refreshWorkspace();
-      }
-    } catch (err) {
-      console.error("Error toggling archive flag:", err);
-    }
-  };
-
-  const handleDeleteNote = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const targetNote = notes.find((n) => n.id === id);
-    if (!targetNote) return;
-
-    const message = targetNote.isTrashed
-      ? "Are you sure you want to permanently delete this secure note? This operation cannot be undone."
-      : "Move this note to the trash container?";
-
-    if (confirm(message)) {
-      try {
-        const res = await fetch(getApiUrl(`/api/notes/${id}`), {
-          method: "DELETE",
-          headers: getAuthHeaders(),
-        });
-
-        if (res.ok) {
-          refreshWorkspace();
-        }
-      } catch (err) {
-        console.error("Error deleting note:", err);
-      }
-    }
+  const handleDeleteNote = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    await deleteNote(id);
   };
 
   const handleNewNoteClick = () => {
@@ -306,103 +57,97 @@ export default function App() {
     setIsModalOpen(true);
   };
 
-  // Screen Router / Loading
+  const currentScreen = currentView;
+
+  const authContent = useMemo(() => {
+    if (currentScreen === "register") {
+      return (
+        <Register
+          onRegister={async (username: string, email: string, password: string) => {
+            await register({ username, email, password });
+          }}
+          onNavigateToLogin={() => setCurrentView("login")}
+          errorMsg={authError}
+          clearError={() => setAuthError("")}
+        />
+      );
+    }
+
+    return (
+      <Login
+        onLogin={async (email: string, password: string) => {
+          await login({ email, password });
+        }}
+        onNavigateToRegister={() => setCurrentView("register")}
+        errorMsg={authError}
+        clearError={() => setAuthError("")}
+      />
+    );
+  }, [authError, currentScreen, login, register, setAuthError, setCurrentView]);
+
   if (appInitializing) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-surface text-primary gap-4">
-        <Shield className="w-12 h-12 animate-pulse" fill="currentColor" />
-        <div className="font-mono text-xs tracking-widest uppercase">Initializing Secure Vault...</div>
-      </div>
+      <AppShell>
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-surface text-primary">
+          <Shield className="h-12 w-12 animate-pulse" fill="currentColor" />
+          <div className="font-mono text-xs uppercase tracking-widest">Initializing your workspace…</div>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface flex flex-col overflow-x-hidden">
+    <AppShell>
       {currentScreen === "dashboard" && currentUser ? (
-        <div className="flex w-full min-h-screen">
-          {/* Desktop Left Drawer Navigation */}
-          <Sidebar
-            currentUser={currentUser}
-            activeView={activeView}
-            onViewChange={setActiveView}
-            onNewNote={handleNewNoteClick}
-            onLogout={handleLogout}
-          />
-
-          {/* Main Workspace Frame */}
-          <div className="flex-1 min-w-0">
-            <Dashboard
+        <div className="flex min-h-screen w-full" id="main-content">
+          <Suspense fallback={<div className="hidden md:block" />}> 
+            <Sidebar
               currentUser={currentUser}
-              notes={notes}
-              stats={stats}
               activeView={activeView}
               onViewChange={setActiveView}
-              searchQuery={searchQuery}
-              onSearchQueryChange={setSearchQuery}
               onNewNote={handleNewNoteClick}
-              onEditNote={handleEditNoteClick}
-              onToggleFavorite={handleToggleFavorite}
-              onToggleArchive={handleToggleArchive}
-              onDeleteNote={handleDeleteNote}
-              onLogout={handleLogout}
+              onLogout={logout}
             />
+          </Suspense>
+
+          <div className="min-w-0 flex-1">
+            <Suspense fallback={<div className="p-8 text-sm text-on-surface-variant">Loading workspace…</div>}>
+              <Dashboard
+                currentUser={currentUser}
+                notes={notes}
+                stats={stats}
+                activeView={activeView}
+                onViewChange={setActiveView}
+                searchQuery={searchQuery}
+                onSearchQueryChange={setSearchQuery}
+                onNewNote={handleNewNoteClick}
+                onEditNote={handleEditNoteClick}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleArchive={handleToggleArchive}
+                onDeleteNote={handleDeleteNote}
+                onLogout={logout}
+                isLoading={isLoading}
+              />
+            </Suspense>
           </div>
         </div>
       ) : (
-        <div className="flex-grow flex items-center justify-center relative">
-          {currentScreen === "register" ? (
-            <Register
-              onRegister={handleRegister}
-              onNavigateToLogin={() => setCurrentScreen("login")}
-              errorMsg={authError}
-              clearError={() => setAuthError("")}
-            />
-          ) : (
-            <Login
-              onLogin={handleLogin}
-              onNavigateToRegister={() => setCurrentScreen("register")}
-              errorMsg={authError}
-              clearError={() => setAuthError("")}
-            />
-          )}
-
-          {/* General Auth Footer */}
-          <footer className="absolute bottom-4 left-0 right-0 py-2 px-6 flex flex-col md:flex-row justify-between items-center w-full max-w-container-max mx-auto space-y-2 md:space-y-0 text-xs text-outline z-0">
-            <p className="font-mono select-none">© 2026 Sentience Ledger. All rights reserved.</p>
-            <div className="flex space-x-6">
-              <button
-                onClick={() => alert("Privacy Policy: All notes are stored encrypted on server disk. We collect zero analytics or trackers.")}
-                className="hover:text-primary transition-colors cursor-pointer"
-              >
-                Privacy Policy
-              </button>
-              <button
-                onClick={() => alert("Security Terms: Credentials hashed on registration with bcrypt. Sessions protected with robust JWT verification.")}
-                className="hover:text-primary transition-colors cursor-pointer"
-              >
-                Security Terms
-              </button>
-              <button
-                onClick={() => alert("Help Center: Direct assistance is handled via corporate secure channels. Contact IT desk.")}
-                className="hover:text-primary transition-colors cursor-pointer"
-              >
-                Help Center
-              </button>
-            </div>
-          </footer>
+        <div className="flex flex-grow items-center justify-center relative" id="main-content">
+          <Suspense fallback={<div className="text-sm text-on-surface-variant">Loading experience…</div>}>{authContent}</Suspense>
         </div>
       )}
 
-      {/* Note Creation/Modification Overlay Modal */}
-      <NoteModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingNote(null);
-        }}
-        onSave={handleSaveNote}
-        editingNote={editingNote}
-      />
-    </div>
+      <Suspense fallback={null}>
+        <NoteModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingNote(null);
+          }}
+          onSave={handleSaveNote}
+          editingNote={editingNote}
+        />
+      </Suspense>
+    </AppShell>
   );
 }

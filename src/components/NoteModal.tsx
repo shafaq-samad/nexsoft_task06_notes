@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Star, Plus, ShieldCheck, AlertTriangle } from "lucide-react";
-import { Note } from "../types";
+import { Note, ApiError } from "../types";
 
 interface NoteModalProps {
   isOpen: boolean;
@@ -24,8 +24,14 @@ export default function NoteModal({ isOpen, onClose, onSave, editingNote }: Note
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     if (editingNote) {
       setTitle(editingNote.title);
       setContent(editingNote.content);
@@ -38,7 +44,26 @@ export default function NoteModal({ isOpen, onClose, onSave, editingNote }: Note
       setIsFavorite(false);
     }
     setErrorMsg("");
-  }, [editingNote, isOpen]);
+
+    const dialog = dialogRef.current;
+    dialog?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+      previousFocusRef.current?.focus();
+    };
+  }, [editingNote, isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -84,8 +109,9 @@ export default function NoteModal({ isOpen, onClose, onSave, editingNote }: Note
         isFavorite,
       });
       onClose();
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to save note. Please check your network connection.");
+    } catch (err) {
+      const error = err as ApiError;
+      setErrorMsg(error.message || "Failed to save note. Please check your network connection.");
     } finally {
       setLoading(false);
     }
@@ -100,16 +126,24 @@ export default function NoteModal({ isOpen, onClose, onSave, editingNote }: Note
       />
 
       {/* Modal Container */}
-      <div className="relative bg-white border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="note-modal-title"
+        tabIndex={-1}
+        className="relative bg-white border border-outline-variant rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
-            <h2 className="font-headline-md text-lg font-bold text-primary">
+            <h2 id="note-modal-title" className="font-headline-md text-lg font-bold text-primary">
               {editingNote ? "Modify Encrypted Note" : "Create New Secure Note"}
             </h2>
           </div>
           <button
+            aria-label="Close note editor"
             onClick={onClose}
             className="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
           >
