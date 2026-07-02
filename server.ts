@@ -10,12 +10,23 @@ import { createServer as createViteServer } from "vite";
 import { authRouter } from "./routes/auth";
 import { notesRouter } from "./routes/notes";
 import { authenticateToken } from "./middleware/auth";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",               // Vite local
+      "https://north-star-notes.vercel.app", // Vercel frontend
+    ],
+    credentials: true,
+  })
+);
 
+app.use(express.json());
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
