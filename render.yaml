@@ -14,5 +14,3 @@ services:
         generateValue: true
       - key: MONGODB_URI
         sync: false
-      - key: DIRECT_MONGODB_URI
-        sync: false
