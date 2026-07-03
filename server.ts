@@ -11,6 +11,7 @@ import { authRouter } from "./routes/auth";
 import { notesRouter } from "./routes/notes";
 import { authenticateToken } from "./middleware/auth";
 import cors from "cors";
+import { initializeMongo } from "./db";
 
 dotenv.config();
 
@@ -46,6 +47,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/notes", authenticateToken, notesRouter);
 
 async function startServer() {
+  await initializeMongo();
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
