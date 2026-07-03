@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR_RENDER_APP_URL.onrender.com/api/$1"
+      "destination": "https://sentience-ledger.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",

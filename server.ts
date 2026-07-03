@@ -16,12 +16,17 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://north-star-notes.vercel.app",
+  "https://sentience-ledger.onrender.com",
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : []),
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",               // Vite local
-      "https://north-star-notes.vercel.app", // Vercel frontend
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
